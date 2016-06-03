@@ -17,6 +17,9 @@ import com.liger.myzhihu.R;
 import com.liger.myzhihu.db.CacheDbHelper;
 import com.liger.myzhihu.fragment.MainFragment;
 
+/**
+ * Created by Shuai on 2015/12/12.
+ */
 
 public class MainActivity extends AppCompatActivity {
 

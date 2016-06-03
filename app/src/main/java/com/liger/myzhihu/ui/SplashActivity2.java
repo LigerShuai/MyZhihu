@@ -30,9 +30,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 
-/**
- * Created by wwjun.wang on 2015/8/11.
- */
 public class SplashActivity2 extends Activity {
     private ImageView iv_start;
 
