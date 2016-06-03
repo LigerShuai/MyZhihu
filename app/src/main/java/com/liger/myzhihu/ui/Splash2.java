@@ -30,7 +30,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 
-public class SplashActivity2 extends Activity {
+public class Splash2 extends Activity {
     private ImageView iv_start;
 
     @Override
@@ -69,7 +69,7 @@ public class SplashActivity2 extends Activity {
 
             @Override
             public void onAnimationEnd(Animation animation) {
-                if (HttpUtils.isNetworkConnected(SplashActivity2.this)) {
+                if (HttpUtils.isNetworkConnected(Splash2.this)) {
                     /**
                      *  AsyncHttpResponseHandler：获取 String 对象
                      *  JsonHttpResponseHandler： 获取 Json 对象
@@ -104,7 +104,7 @@ public class SplashActivity2 extends Activity {
                         }
                     });
                 } else {
-                    Toast.makeText(SplashActivity2.this, "没有网络连接!", Toast.LENGTH_LONG).show();
+                    Toast.makeText(Splash2.this, "没有网络连接!", Toast.LENGTH_LONG).show();
                     startActivity();
                 }
             }
@@ -119,7 +119,7 @@ public class SplashActivity2 extends Activity {
     }
 
     private void startActivity() {
-        Intent intent = new Intent(SplashActivity2.this, MainActivity.class);
+        Intent intent = new Intent(Splash2.this, MainActivity.class);
         startActivity(intent);
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
         finish();
