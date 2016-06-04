@@ -5,6 +5,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.Snackbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,11 +22,12 @@ import com.liger.myzhihu.model.StoriesEntity;
 import com.liger.myzhihu.ui.MainActivity;
 import com.liger.myzhihu.utils.Constants;
 import com.liger.myzhihu.utils.HttpUtils;
-import com.loopj.android.http.TextHttpResponseHandler;
-
-import org.apache.http.Header;
+import com.zhy.http.okhttp.OkHttpUtils;
+import com.zhy.http.okhttp.callback.StringCallback;
 
 import java.util.List;
+
+import okhttp3.Call;
 
 /**
  * 默认的主页面 （今日热闻界面）
@@ -38,21 +40,21 @@ public class MainFragment extends BaseFragment {
     private Latest latest;
     private String date;//  最新消息的时间
     private Handler handler = new Handler();
-    private MainNewsItemAdapter adpter;
+    private MainNewsItemAdapter adapter;
     private Before before;
 
     @Override
     protected View initView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         ((MainActivity) mActivity).setToolbarTitle("今日热闻");
-        View view = inflater.inflate(R.layout.mainfragment, container,false);
+        View view = inflater.inflate(R.layout.mainfragment, container, false);
         init(view);
         return view;
     }
 
     private void init(View view) {
         listView = (ListView) view.findViewById(R.id.mainfragment_listview);
-        adpter = new MainNewsItemAdapter(mActivity);
-        listView.setAdapter(adpter);
+        adapter = new MainNewsItemAdapter(mActivity);
+        listView.setAdapter(adapter);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -74,7 +76,7 @@ public class MainFragment extends BaseFragment {
 
                     //滑到底部时，加载过去的消息
                     if (firstVisibleItem + visibleItemCount == totalItemCount && !isLoading) {
-                        loadMore(Constants.BEFORE + date);
+                        loadMore(Constants.BASEURL + Constants.BEFORE + date);
                     }
                 }
             }
@@ -87,22 +89,25 @@ public class MainFragment extends BaseFragment {
     private void loadMore(String url) {
         isLoading = true;
         if (HttpUtils.isNetworkConnected(mActivity)) {
-            HttpUtils.get(url, new TextHttpResponseHandler() {
+            OkHttpUtils.get()
+                    .url(url)
+                    .build()
+                    .execute(new StringCallback() {
+                        @Override
+                        public void onError(Call call, Exception e, int id) {
 
-                @Override
-                public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+                        }
 
-                }
-
-                @Override
-                public void onSuccess(int statusCode, Header[] headers, String responseString) {
-                    //将数据存入数据库
-                    SQLiteDatabase db = ((MainActivity) mActivity).getCacheDbHelper().getWritableDatabase();
-                    db.execSQL("replace into CacheList(date,json) values(" + date + ",' " + responseString + "')");
-                    db.close();
-                    parseBeforeJson(responseString);
-                }
-            });
+                        @Override
+                        public void onResponse(String response, int id) {
+                            //将数据存入数据库
+                            SQLiteDatabase db = ((MainActivity) mActivity).getCacheDbHelper().getWritableDatabase();
+                            db.execSQL("replace into CacheList(date,json) values(" + date + ",' " + response + "')");
+                            db.close();
+                            parseBeforeJson(response);
+                            Log.d("shuai", "loadmore");
+                        }
+                    });
         } else {
             SQLiteDatabase db = ((MainActivity) mActivity).getCacheDbHelper().getReadableDatabase();
             Cursor cursor = db.rawQuery("select * from CacheList where date = " + date, null);
@@ -139,7 +144,7 @@ public class MainFragment extends BaseFragment {
                 topic.setType(Constants.TOPIC);
                 topic.setTitle(convertDate(date));
                 list.add(0, topic);
-                adpter.addList(list);
+                adapter.addList(list);
                 isLoading = false;
             }
         });
@@ -153,6 +158,10 @@ public class MainFragment extends BaseFragment {
         time.append(date.substring(0, 4)).append("年")
                 .append(date.substring(5, 6)).append("月")
                 .append(date.substring(7, 8)).append("日");
+        /*String timeStr = "";
+        timeStr = timeStr.concat(date.substring(0, 4)).concat("年")
+                .concat(date.substring(5, 6)).concat("月")
+                .concat(date.substring(7, 8)).concat("日");*/
         return time.toString();
     }
 
@@ -168,22 +177,40 @@ public class MainFragment extends BaseFragment {
     private void loadFirst() {
         isLoading = true;
         if (HttpUtils.isNetworkConnected(mActivity)) {
-            //加载最新新闻
-            HttpUtils.get(Constants.LATESTNEWS, new TextHttpResponseHandler() {
-                @Override
-                public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+            OkHttpUtils.get()
+                    .url(Constants.BASEURL + Constants.LATESTNEWS)
+                    .build()
+                    .execute(new StringCallback() {
+                        @Override
+                        public void onError(Call call, Exception e, int id) {
 
+                        }
+
+                        @Override
+                        public void onResponse(String response, int id) {
+                            //将数据存入数据库
+                            SQLiteDatabase db = ((MainActivity) mActivity).getCacheDbHelper().getWritableDatabase();
+                            db.execSQL("replace into CacheList(date,json) values(" + Constants.LATEST_COLUMN + ",' " + response + "')");
+                            db.close();
+                            parseLatestJson(response);
+                            Log.d("shuai", "loadfirst");
+                        }
+                    });
+           /* Request request = new Request.Builder().url(Constants.BASEURL+Constants.LATESTNEWS).build();
+            OkHttpUtil.enqueue(request, new Callback() {
+                @Override
+                public void onFailure(Call call, IOException e) {
                 }
-
                 @Override
-                public void onSuccess(int statusCode, Header[] headers, String responseString) {
+                public void onResponse(Call call, Response response) throws IOException {
+                    String responseString =  response.body().string();
                     //将数据存入数据库
                     SQLiteDatabase db = ((MainActivity) mActivity).getCacheDbHelper().getWritableDatabase();
                     db.execSQL("replace into CacheList(date,json) values(" + Constants.LATEST_COLUMN + ",' " + responseString + "')");
                     db.close();
                     parseLatestJson(responseString);
                 }
-            });
+            });*/
         } else {
             SQLiteDatabase db = ((MainActivity) mActivity).getCacheDbHelper().getReadableDatabase();
             Cursor cursor = db.rawQuery("select * from CacheList where date = " + Constants.LATEST_COLUMN, null);
@@ -212,7 +239,7 @@ public class MainFragment extends BaseFragment {
                 topic.setType(Constants.TOPIC);
                 topic.setTitle("今日热闻");
                 list.add(0, topic);  // 将topic插入到List的第0个位置，List中原来的值依次后移
-                adpter.addList(list);
+                adapter.addList(list);
                 isLoading = false;
             }
         });

@@ -20,14 +20,19 @@ import android.widget.BaseAdapter;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.google.gson.Gson;
 import com.liger.myzhihu.R;
 import com.liger.myzhihu.model.MenuListItem;
+import com.liger.myzhihu.model.Themes;
 import com.liger.myzhihu.ui.MainActivity;
 import com.liger.myzhihu.utils.Constants;
 import com.liger.myzhihu.utils.HttpUtils;
 import com.liger.myzhihu.utils.PreferUtil;
 import com.loopj.android.http.JsonHttpResponseHandler;
+import com.zhy.http.okhttp.OkHttpUtils;
+import com.zhy.http.okhttp.callback.StringCallback;
 
 import org.apache.http.Header;
 import org.json.JSONArray;
@@ -37,10 +42,12 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
+import okhttp3.Call;
+
 /**
  * Created by Shuai on 2015/12/17.
  */
-public class MenuFragment extends BaseFragment {
+public class MenuFragment extends BaseFragment implements View.OnClickListener{
 
     private LinearLayout topMenu;
     private TextView login;
@@ -48,6 +55,8 @@ public class MenuFragment extends BaseFragment {
     private TextView download;
     private TextView main;//首页
     private ListView listView;
+
+    private Themes themes;
 
     private List<MenuListItem> items;// 新闻条目 的数据源
     private NewsTypeAdapter adapter;
@@ -181,32 +190,40 @@ public class MenuFragment extends BaseFragment {
     protected void initData() {
         items = new ArrayList<>();
         if (HttpUtils.isNetworkConnected(mActivity)) {
-            HttpUtils.get(Constants.THEMES, new JsonHttpResponseHandler() {
-                @Override
-                public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                    super.onSuccess(statusCode, headers, response);
-                    String json = response.toString();
-                    // 把json数据存放在 SharedPreferences 里
-                    PreferUtil.putStringToDefault(mActivity, Constants.THEMES, json);
-                    parseJson(response);
-                    listView.setAdapter(new NewsTypeAdapter());
-                }
-            });
+            OkHttpUtils.get()
+                    .url(Constants.BASEURL + Constants.THEMES)
+                    .build()
+                    .execute(new StringCallback() {
+                        @Override
+                        public void onError(Call call, Exception e, int id) {
+
+                        }
+
+                        @Override
+                        public void onResponse(String response, int id) {
+                            // 把数据存放在 SharedPreferences 里
+                            PreferUtil.putStringToDefault(mActivity, Constants.THEMES, response);
+                            parseJson(response);
+                            listView.setAdapter(new NewsTypeAdapter());
+                        }
+                    });
         } else {
-            String json = PreferUtil.getStringFromDefault(mActivity, Constants.THEMES, "");
-            try {
+            String cache = PreferUtil.getStringFromDefault(mActivity, Constants.THEMES, "");
+            parseJson(cache);
+           /* try {
                 JSONObject object = new JSONObject(json);
                 parseJson(object);
             } catch (JSONException e) {
                 e.printStackTrace();
-            }
+            }*/
         }
     }
 
-    private void parseJson(JSONObject response) {
+    private void parseJson(String response) {
         try {
-            JSONArray jsonArray = response.getJSONArray("others");
-            for (int i = 0; i < jsonArray.length(); i++) {
+            JSONObject jsonObject = new JSONObject(response);
+            JSONArray jsonArray = jsonObject.getJSONArray("others");
+            for (int i=0;i<jsonArray.length();i++) {
                 MenuListItem listItem = new MenuListItem();
                 JSONObject object = jsonArray.getJSONObject(i);
                 // 把解析出的数据存放在实体类中
@@ -219,16 +236,15 @@ public class MenuFragment extends BaseFragment {
         }
     }
 
-  /*  @Override
+    @Override
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.tv_main:
-                Toast.makeText(mActivity, "dianji", Toast.LENGTH_SHORT).show();
                 ((MainActivity) mActivity).loadLatest();
                 ((MainActivity) mActivity).closeDrawer();
                 break;
         }
-    }*/
+    }
 
     /**
      * 侧滑菜单里 新闻类型的适配器

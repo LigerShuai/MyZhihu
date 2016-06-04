@@ -2,6 +2,7 @@ package com.liger.myzhihu.ui;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.view.Window;
@@ -16,6 +17,8 @@ import com.liger.myzhihu.utils.Constants;
 import com.liger.myzhihu.utils.HttpUtils;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.BinaryHttpResponseHandler;
+import com.zhy.http.okhttp.OkHttpUtils;
+import com.zhy.http.okhttp.callback.BitmapCallback;
 
 import org.apache.http.Header;
 import org.json.JSONException;
@@ -25,6 +28,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+
+import okhttp3.Call;
 
 /**
  * Created by Shuai on 2015/12/17.
@@ -70,10 +75,20 @@ public class SplashActivity extends Activity {
             public void onAnimationEnd(Animation animation) {
                 // 通过两层请求获取启动图像
                 if (HttpUtils.isNetworkConnected(SplashActivity.this)) {
-                    /**
-                     *  AsyncHttpResponseHandler：获取 String 对象
-                     *  JsonHttpResponseHandler： 获取 Json 对象
-                     */
+                    OkHttpUtils.get()
+                            .url(Constants.BASEURL+Constants.START)
+                            .build()
+                            .execute(new BitmapCallback() {
+                                @Override
+                                public void onError(Call call, Exception e, int id) {
+
+                                }
+
+                                @Override
+                                public void onResponse(Bitmap response, int id) {
+
+                                }
+                            });
                     HttpUtils.get(Constants.START, new AsyncHttpResponseHandler() {
                         @Override
                         public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {

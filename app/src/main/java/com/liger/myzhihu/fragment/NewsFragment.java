@@ -19,11 +19,12 @@ import com.liger.myzhihu.model.News;
 import com.liger.myzhihu.ui.MainActivity;
 import com.liger.myzhihu.utils.Constants;
 import com.liger.myzhihu.utils.HttpUtils;
-import com.loopj.android.http.TextHttpResponseHandler;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
+import com.zhy.http.okhttp.OkHttpUtils;
+import com.zhy.http.okhttp.callback.StringCallback;
 
-import org.apache.http.Header;
+import okhttp3.Call;
 
 /**
  * 各新闻类型的主页面
@@ -31,7 +32,7 @@ import org.apache.http.Header;
  */
 public class NewsFragment extends BaseFragment {
 
-    private String id;   //新闻id
+    private String newsId;   //新闻id
     private String title;//新闻标题
 
     private ListView listView;
@@ -57,7 +58,7 @@ public class NewsFragment extends BaseFragment {
         super.onCreate(savedInstanceState);
         Bundle bundle = getArguments();
         if (bundle != null) {
-            id = bundle.getString("id");
+            newsId = bundle.getString("id");
             title = bundle.getString("title");
         }
     }
@@ -106,28 +107,31 @@ public class NewsFragment extends BaseFragment {
 
     @Override
     protected void initData() {
-        super.initData();//详细用法 ?
+        super.initData();
         if (HttpUtils.isNetworkConnected(mActivity)) {
-            HttpUtils.get(Constants.THEMENEWS + id, new TextHttpResponseHandler() {
-                @Override
-                public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+            OkHttpUtils.get()
+                    .url(Constants.BASEURL+Constants.THEMENEWS + newsId)
+                    .build()
+                    .execute(new StringCallback() {
+                        @Override
+                        public void onError(Call call, Exception e, int id) {
 
-                }
+                        }
 
-                @Override
-                public void onSuccess(int statusCode, Header[] headers, String responseString) {
-                    SQLiteDatabase db = ((MainActivity) mActivity).getCacheDbHelper().getWritableDatabase();
-                    db.execSQL("replace into CacheList(date,json) values(" + (Constants.BASE_COLUMN + Integer.parseInt(id))
-                            + ",' " + responseString + "')");
-                    db.close();
-                    parseJson(responseString);
-                    setAdapter();
-                }
-            });
+                        @Override
+                        public void onResponse(String response, int id) {
+                            SQLiteDatabase db = ((MainActivity) mActivity).getCacheDbHelper().getWritableDatabase();
+                            db.execSQL("replace into CacheList(date,json) values(" + (Constants.BASE_COLUMN + Integer.parseInt(newsId))
+                                    + ",' " + response + "')");
+                            db.close();
+                            parseJson(response);
+                            setAdapter();
+                        }
+                    });
         } else {
             SQLiteDatabase db = ((MainActivity) mActivity).getCacheDbHelper().getReadableDatabase();
             Cursor cursor = db.rawQuery("select * from CacheList where date = " + (Constants.BASE_COLUMN +
-                    Integer.parseInt(id)), null);
+                    Integer.parseInt(newsId)), null);
             if (cursor.moveToFirst()) {
                 String json = cursor.getString(cursor.getColumnIndex("json"));
                 parseJson(json);
