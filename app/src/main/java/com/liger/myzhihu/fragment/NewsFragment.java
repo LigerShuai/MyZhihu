@@ -24,6 +24,8 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 import com.zhy.http.okhttp.OkHttpUtils;
 import com.zhy.http.okhttp.callback.StringCallback;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import okhttp3.Call;
 
 /**
@@ -32,12 +34,13 @@ import okhttp3.Call;
  */
 public class NewsFragment extends BaseFragment {
 
-    private String newsId;   //新闻id
-    private String title;//新闻标题
-
-    private ListView listView;
+    @BindView(R.id.newsfragment_listview)
+    ListView listView;
     private ImageView imgTitle;
     private TextView textViewTitle;
+
+    private String newsId;   //新闻id
+    private String title;//新闻标题
 
     private ImageLoader imageLoader;
 
@@ -67,13 +70,13 @@ public class NewsFragment extends BaseFragment {
     protected View initView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         ((MainActivity) mActivity).setToolbarTitle(title);
         View view = inflater.inflate(R.layout.newsfragment_layout, null);
-        init(view);
+        ButterKnife.bind(this, view);
+        init();
         return view;
     }
 
-    private void init(View view) {
+    private void init() {
         imageLoader = ImageLoader.getInstance();
-        listView = (ListView) view.findViewById(R.id.newsfragment_listview);
         addHeader();
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -100,8 +103,8 @@ public class NewsFragment extends BaseFragment {
      */
     private void addHeader() {
         View header = LayoutInflater.from(mActivity).inflate(R.layout.news_header, listView, false);
-        imgTitle = (ImageView) header.findViewById(R.id.image_title);
-        textViewTitle = (TextView) header.findViewById(R.id.textview_title);
+        imgTitle = ButterKnife.findById(header, R.id.image_title);
+        textViewTitle = ButterKnife.findById(header, R.id.textview_title);
         listView.addHeaderView(header);
     }
 
@@ -110,7 +113,7 @@ public class NewsFragment extends BaseFragment {
         super.initData();
         if (HttpUtils.isNetworkConnected(mActivity)) {
             OkHttpUtils.get()
-                    .url(Constants.BASEURL+Constants.THEMENEWS + newsId)
+                    .url(Constants.BASEURL + Constants.THEMENEWS + newsId)
                     .build()
                     .execute(new StringCallback() {
                         @Override

@@ -29,6 +29,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import okhttp3.Call;
 
 /**
@@ -36,7 +38,7 @@ import okhttp3.Call;
  */
 public class SplashActivity extends Activity {
 
-    private ImageView startImage;
+    @BindView(R.id.start)    ImageView startImage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,7 +46,7 @@ public class SplashActivity extends Activity {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.splash);
-        startImage = (ImageView) findViewById(R.id.start);
+        ButterKnife.bind(this);
         initImagePath();
     }
 
@@ -76,7 +78,7 @@ public class SplashActivity extends Activity {
                 // 通过两层请求获取启动图像
                 if (HttpUtils.isNetworkConnected(SplashActivity.this)) {
                     OkHttpUtils.get()
-                            .url(Constants.BASEURL+Constants.START)
+                            .url(Constants.BASEURL + Constants.START)
                             .build()
                             .execute(new BitmapCallback() {
                                 @Override
@@ -141,7 +143,7 @@ public class SplashActivity extends Activity {
         finish();
     }
 
-    private void saveImage(File file,byte[] data) {
+    private void saveImage(File file, byte[] data) {
         if (file.exists()) {
             file.delete();
         }

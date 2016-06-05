@@ -20,9 +20,7 @@ import android.widget.BaseAdapter;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.google.gson.Gson;
 import com.liger.myzhihu.R;
 import com.liger.myzhihu.model.MenuListItem;
 import com.liger.myzhihu.model.Themes;
@@ -30,11 +28,9 @@ import com.liger.myzhihu.ui.MainActivity;
 import com.liger.myzhihu.utils.Constants;
 import com.liger.myzhihu.utils.HttpUtils;
 import com.liger.myzhihu.utils.PreferUtil;
-import com.loopj.android.http.JsonHttpResponseHandler;
 import com.zhy.http.okhttp.OkHttpUtils;
 import com.zhy.http.okhttp.callback.StringCallback;
 
-import org.apache.http.Header;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -42,19 +38,21 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import okhttp3.Call;
 
 /**
  * Created by Shuai on 2015/12/17.
  */
-public class MenuFragment extends BaseFragment implements View.OnClickListener{
+public class MenuFragment extends BaseFragment implements View.OnClickListener {
 
-    private LinearLayout topMenu;
-    private TextView login;
-    private TextView backup;
-    private TextView download;
-    private TextView main;//首页
-    private ListView listView;
+    @BindView(R.id.tv_login)    TextView login;
+    @BindView(R.id.tv_backup)    TextView backup;
+    @BindView(R.id.tv_download)    TextView download;
+    @BindView(R.id.top_linear_menu)    LinearLayout topMenu;
+    @BindView(R.id.tv_main)    TextView main;//首页
+    @BindView(R.id.listview)    ListView listView;
 
     private Themes themes;
 
@@ -64,6 +62,7 @@ public class MenuFragment extends BaseFragment implements View.OnClickListener{
     @Override
     protected View initView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.menu, null);
+        ButterKnife.bind(this, view);
         init(view);
         return view;
     }
@@ -148,20 +147,14 @@ public class MenuFragment extends BaseFragment implements View.OnClickListener{
         });
 
         ObjectAnimator animator1 = ObjectAnimator.ofFloat(view, "translationX", 300f);
-        ObjectAnimator animator2 = ObjectAnimator.ofFloat(view, "scaleX", 1f,0f,1f);
-        ObjectAnimator animator3 = ObjectAnimator.ofFloat(view, "scaleY", 1f,0f,1f);
+        ObjectAnimator animator2 = ObjectAnimator.ofFloat(view, "scaleX", 1f, 0f, 1f);
+        ObjectAnimator animator3 = ObjectAnimator.ofFloat(view, "scaleY", 1f, 0f, 1f);
         AnimatorSet animatorSet = new AnimatorSet();
         animatorSet.setDuration(1000);
-        animatorSet.playTogether(animator1,animator2,animator3);
+        animatorSet.playTogether(animator1, animator2, animator3);
         animatorSet.start();
 
 
-
-        topMenu = (LinearLayout) view.findViewById(R.id.top_linear_menu);
-        login = (TextView) view.findViewById(R.id.tv_login);
-        backup = (TextView) view.findViewById(R.id.tv_backup);
-        download = (TextView) view.findViewById(R.id.tv_download);
-        main = (TextView) view.findViewById(R.id.tv_main);
         main.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -170,7 +163,6 @@ public class MenuFragment extends BaseFragment implements View.OnClickListener{
             }
         });
 
-        listView = (ListView) view.findViewById(R.id.listview);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -223,7 +215,7 @@ public class MenuFragment extends BaseFragment implements View.OnClickListener{
         try {
             JSONObject jsonObject = new JSONObject(response);
             JSONArray jsonArray = jsonObject.getJSONArray("others");
-            for (int i=0;i<jsonArray.length();i++) {
+            for (int i = 0; i < jsonArray.length(); i++) {
                 MenuListItem listItem = new MenuListItem();
                 JSONObject object = jsonArray.getJSONObject(i);
                 // 把解析出的数据存放在实体类中

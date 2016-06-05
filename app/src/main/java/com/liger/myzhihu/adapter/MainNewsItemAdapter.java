@@ -17,6 +17,9 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 import java.util.ArrayList;
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 /**
  * 主界面默认新闻的适配器
  * Created by Shuai on 2015/12/19.
@@ -67,10 +70,7 @@ public class MainNewsItemAdapter extends BaseAdapter {
         ViewHolder holder = null;
         if (convertView == null) {
             convertView = LayoutInflater.from(context).inflate(R.layout.mainfragment_news_item, null);
-            holder = new ViewHolder();
-            holder.imgTitle = (ImageView) convertView.findViewById(R.id.mainfragment_iv_title);
-            holder.tvTitle = (TextView) convertView.findViewById(R.id.mainfragment_tv_title);
-            holder.tvTopic = (TextView) convertView.findViewById(R.id.mainfragment_tv_topic);
+            holder = new ViewHolder(convertView);
             convertView.setTag(holder);
         } else {
             holder = (ViewHolder) convertView.getTag();
@@ -88,14 +88,18 @@ public class MainNewsItemAdapter extends BaseAdapter {
             holder.tvTitle.setVisibility(View.VISIBLE);
             holder.imgTitle.setVisibility(View.VISIBLE);
             holder.tvTitle.setText(entity.getTitle());
-            imageLoader.displayImage(entity.getImages().get(0),holder.imgTitle,options);// 为什么从0开始
+            imageLoader.displayImage(entity.getImages().get(0), holder.imgTitle, options);// 为什么从0开始
         }
         return convertView;
     }
 
-    class ViewHolder{
-        TextView tvTopic;
-        TextView tvTitle;
-        ImageView imgTitle;
+    static class ViewHolder {
+        @BindView(R.id.mainfragment_tv_topic)        TextView tvTopic;
+        @BindView(R.id.mainfragment_iv_title)        ImageView imgTitle;
+        @BindView(R.id.mainfragment_tv_title)        TextView tvTitle;
+
+        ViewHolder(View view) {
+            ButterKnife.bind(this, view);
+        }
     }
 }

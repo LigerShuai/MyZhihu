@@ -15,10 +15,13 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 /**
  * Created by Liger on 2015/12/18.
  */
-public class NewsItemAdapter extends BaseAdapter{
+public class NewsItemAdapter extends BaseAdapter {
 
     private Context context;
     private List<StoriesEntity> entities;
@@ -54,11 +57,11 @@ public class NewsItemAdapter extends BaseAdapter{
     public View getView(int i, View view, ViewGroup viewGroup) {
         ViewHolder holder;
         if (view == null) {
-            holder = new ViewHolder();
             view = LayoutInflater.from(context).inflate(R.layout.newsfragment_news_item, null);
-            holder.textView = (TextView) view.findViewById(R.id.newsfragment_tv_title);
-            holder.imageView = (ImageView) view.findViewById(R.id.newsfragment_iv_title);
+            holder = new ViewHolder(view);
             view.setTag(holder);
+//            holder.textView = (TextView) view.findViewById(R.id.newsfragment_tv_title);
+//            holder.imageView = (ImageView) view.findViewById(R.id.newsfragment_iv_title);
         } else {
             holder = (ViewHolder) view.getTag();
         }
@@ -73,8 +76,17 @@ public class NewsItemAdapter extends BaseAdapter{
         return view;
     }
 
-    public class ViewHolder{
+    static class ViewHolder {
+        @BindView(R.id.newsfragment_iv_title)        ImageView imageView;
+        @BindView(R.id.newsfragment_tv_title)        TextView textView;
+
+        ViewHolder(View view) {
+            ButterKnife.bind(this, view);
+        }
+    }
+
+   /* public class ViewHolder{
         TextView textView;
         ImageView imageView;
-    }
+    }*/
 }

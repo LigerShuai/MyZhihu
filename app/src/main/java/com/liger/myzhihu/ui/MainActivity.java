@@ -17,16 +17,19 @@ import com.liger.myzhihu.R;
 import com.liger.myzhihu.db.CacheDbHelper;
 import com.liger.myzhihu.fragment.MainFragment;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 /**
  * Created by Shuai on 2015/12/12.
  */
 
 public class MainActivity extends AppCompatActivity {
 
-    private Toolbar toolbar;
-    private SwipeRefreshLayout refreshLayout;
-    private DrawerLayout drawerLayout;
-    private FrameLayout framelayout;
+    @BindView(R.id.toolbar)    Toolbar toolbar;
+    @BindView(R.id.framelayout_content)    FrameLayout framelayout;
+    @BindView(R.id.swiperefresh)    SwipeRefreshLayout refreshLayout;
+    @BindView(R.id.drawer_layout)    DrawerLayout drawerLayout;
 
     private String currentFragmentId;
     private CacheDbHelper dbHelper;
@@ -37,6 +40,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        ButterKnife.bind(this);
         dbHelper = new CacheDbHelper(this, 1);//指定数据库版本号为1
 
         initView();
@@ -48,17 +52,12 @@ public class MainActivity extends AppCompatActivity {
      */
     public void loadLatest() {
         getSupportFragmentManager().beginTransaction()
-                .replace(R.id.framelayout_content,new MainFragment(),"latest")
+                .replace(R.id.framelayout_content, new MainFragment(), "latest")
                 .commit();
         currentFragmentId = "latest";
     }
 
     private void initView() {
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
-        refreshLayout = (SwipeRefreshLayout) findViewById(R.id.swiperefresh);
-        drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        framelayout = (FrameLayout) findViewById(R.id.framelayout_content);
-
         setSupportActionBar(toolbar);
 
         refreshLayout.setColorSchemeColors(android.R.color.holo_blue_bright, android.R.color.holo_green_light);
@@ -81,9 +80,9 @@ public class MainActivity extends AppCompatActivity {
      * 刷新,替换为主页面
      */
     private void replaceMainFragment() {
-        if (currentFragmentId.equals("latest")){
+        if (currentFragmentId.equals("latest")) {
             getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.framelayout_content, new MainFragment(),"latest")
+                    .replace(R.id.framelayout_content, new MainFragment(), "latest")
                     .commit();
         }
     }
@@ -96,7 +95,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     //关闭Drawer
-    public void closeDrawer(){
+    public void closeDrawer() {
         drawerLayout.closeDrawers();
     }
 
@@ -129,7 +128,7 @@ public class MainActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        switch (id){
+        switch (id) {
             case R.id.action_settings:
                 Toast.makeText(this, "setting", Toast.LENGTH_SHORT).show();
                 break;

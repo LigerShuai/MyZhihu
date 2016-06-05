@@ -27,6 +27,8 @@ import com.zhy.http.okhttp.callback.StringCallback;
 
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import okhttp3.Call;
 
 /**
@@ -35,7 +37,7 @@ import okhttp3.Call;
  */
 public class MainFragment extends BaseFragment {
 
-    private ListView listView;
+    @BindView(R.id.mainfragment_listview)    ListView listView;
     private boolean isLoading = false;//是否从网络加载 ？
     private Latest latest;
     private String date;//  最新消息的时间
@@ -47,12 +49,12 @@ public class MainFragment extends BaseFragment {
     protected View initView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         ((MainActivity) mActivity).setToolbarTitle("今日热闻");
         View view = inflater.inflate(R.layout.mainfragment, container, false);
-        init(view);
+        ButterKnife.bind(this, view);
+        init();
         return view;
     }
 
-    private void init(View view) {
-        listView = (ListView) view.findViewById(R.id.mainfragment_listview);
+    private void init() {
         adapter = new MainNewsItemAdapter(mActivity);
         listView.setAdapter(adapter);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
